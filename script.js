@@ -1,6 +1,26 @@
 const STORAGE_KEY = 'vocabulaireFlashcards';
 let currentWord = null;
 
+async function chargerListeParDefaut() {
+    try {
+        // 1. Demander le fichier JSON
+        const response = await fetch('data.json');
+        
+        // 2. Vérifier si la requête a réussi (code 200)
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+        
+        // 3. Parser le contenu en objet JavaScript
+        const motsDefaut = await response.json();
+        
+        return motsDefaut;
+
+    } catch (error) {
+        return []; // Retourne un tableau vide en cas d'échec
+    }
+}  
+
 // Charge tous les mots depuis le localStorage
 function chargerMots() {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -155,6 +175,8 @@ function exporterMots() {
 }
 
 
+
+
 // ... fonctions précédentes (exporterMots, commencerTest, verifierReponse) ...
 
 /**
@@ -250,6 +272,12 @@ function verifierReponse() {
 }
 
 // Au chargement, vérifier si des mots existent et afficher un message
-window.onload = () => {
+window.onload = async () => {
+    if (chargerMots().length === 0) {
+        // Si vide, sauvegarder la liste par défaut
+        const listeChargee = await chargerListeParDefaut();
+        sauvegarderMots(listeChargee);
+    }
+
     afficherListeMots();
 };
